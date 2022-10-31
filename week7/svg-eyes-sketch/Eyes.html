@@ -145,7 +145,7 @@
 
         
 
-        const animate = (steps, isOpen, time, onDone) => {
+        const animate = (steps, isOpen, time, ondone) => {
             const toAnimate     = closeLidLayer.children[0];
             const pathStart     = isOpen  ? combinePath(0) : combinePath(70);
             const pathEnd       = !isOpen ? combinePath(0) : combinePath(70);
@@ -165,7 +165,7 @@
                 currentStep++;
                 if(currentStep === stepsToDo.length) {
                     clearInterval(interval);
-                    if(onDone) onDone();
+                    if(ondone) ondone();
                 }
             }, time / steps);
         }
