@@ -141,25 +141,25 @@
                 animate(stepsValue, true, timeValue, () => {animate(stepsValue, false, timeValue)});
         }, 7 * 1000);
 
-        const combinePath = (curve) => `M0 60 A60,60 0 0,1 120,60 A60,${Math.abs(curve - 30)} 0 0,${curve > 30 ? 1 : 0} 0,60 Z`
+        const calculatePath = (curve) => `M0 60 A60,60 0 0,1 120,60 A60,${Math.abs(curve - 30)} 0 0,${curve > 30 ? 1 : 0} 0,60 Z`
 
         
 
         const animate = (steps, isOpen, time, ondone) => {
             const toAnimate     = closeLidLayer.children[0];
-            const pathStart     = isOpen  ? combinePath(0) : combinePath(70);
-            const pathEnd       = !isOpen ? combinePath(0) : combinePath(70);
+            const pathStart     = isOpen  ? calculatePath(0) : calculatePath(70);
+            const pathEnd       = !isOpen ? calculatePath(0) : calculatePath(70);
             const eachStep      = 70 / (steps + 1);
             let stepsToDo       = [];
         
             stepsToDo.push(pathStart);
             for(let i = 0; i < steps; i++){
-                stepsToDo.push(combinePath(isOpen ? eachStep * (i + 1) : 70 - eachStep * i))
+                stepsToDo.push(calculatePath(isOpen ? eachStep * (i + 1) : 70 - eachStep * i))
             }
             stepsToDo.push(pathEnd);
 
             let currentStep = 0
-            let interval = setInterval(() => {
+            let interval = setInterval(_ => {
                 const curr = stepsToDo[currentStep];
                 toAnimate.setAttribute('d', curr);
                 currentStep++;
@@ -167,7 +167,7 @@
                     clearInterval(interval);
                     if(ondone) ondone();
                 }
-            }, time / steps);
+            }, time / stepsToDo.length);
         }
 
         
