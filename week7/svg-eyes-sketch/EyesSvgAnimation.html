@@ -2,10 +2,7 @@
 <html>
 <head>
     <title>View</title>
-    <label for="stepsSlider">Steps (from 0 to 200)</label>
-    <input type="range" min="0" max="200" value="20" class="slider" id="stepsSlider">
-    <label for="timeSlider">Time (from 100 to 3000 in ms)</label>
-    <input type="range" min="100" max="3000" value="300" class="slider" id="timeSlider">
+
     <style>
         body {
             margin: 0;
@@ -26,6 +23,8 @@
             top:  100px;
             left: 250px;
         }
+
+
     </style>
 </head>
 <body>
@@ -34,7 +33,7 @@
 
 <script>
 
-    const eyeViewOld = id => `
+const eyeView = id => `
     <svg id="${id}" viewBox="0 0 120 120">
 
       <filter id="shadow">
@@ -58,7 +57,7 @@
         <ellipse cx="60" cy="60" rx="30" ry="30" opacity="1" fill="url(#gradient1)" />
         <ellipse cx="50" cy="50" rx="7"  ry="7"  opacity="1" fill="#FFFFFF" fill-opacity="0.8"/>
       </g>
-      <g id="${id}_openLids">
+      <g id="${id}_openLids" class="lid" >
         <path d="M0 60 A60,60 0 0,1 120,60 A60,30 0 0,0 0,60 Z" opacity="1" fill="#FDDC99" fill-opacity="1" filter="url(#shadow)">
         </path>
         <path d="M0 60 A60,60 0 0,0 120,60 A60,40 0 0,1 0,60 Z" opacity="1" fill="#F4CB76" fill-opacity="1" />
@@ -68,14 +67,11 @@
             <animate 
                 attributeName="d"
                 values="M0 60 A60,60 0 0,1 120,60 A60,40 0 0,1 0,60 Z;
-                        M0 60 A60,60 0 0,1 120,60 A60,40 0 0,1 0,60 Z;
                         M0 60 A60,60 0 0,1 120,60 A60,0  0 0,1 0,60 Z;
                         M0 60 A60,60 0 0,1 120,60 A60,0  0 1,0 0,60 Z;
-                        M0 60 A60,60 0 0,1 120,60 A60,30 0 0,0 0,60 Z;
-                        M0 60 A60,60 0 0,1 120,60 A60,30 0 0,0 0,60 Z;
+                        M0 60 A60,60 0 0,1 120,60 A60,30 0 1,0 0,60 Z;
                         M0 60 A60,60 0 0,1 120,60 A60,0  0 1,0 0,60 Z;
                         M0 60 A60,60 0 0,1 120,60 A60,0  0 0,1 0,60 Z;
-                        M0 60 A60,60 0 0,1 120,60 A60,40 0 0,1 0,60 Z"
                         M0 60 A60,60 0 0,1 120,60 A60,40 0 0,1 0,60 Z"
                 dur="3s"
                 repeatCount="indefinite" />
@@ -84,101 +80,27 @@
     </svg>
     `;
 
-    const eyeView = id => `
-    <svg id="${id}" viewBox="0 0 120 120">
-
-      <filter id="shadow">
-        <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
-        <feOffset       dx="0" dy="8" />
-        <feColorMatrix  type="matrix"
-                        values="0 0 0 0  0
-                                0 0 0 0  0
-                                0 0 0 0  0
-                                0 0 0 .5 0"/>
-        <feBlend        in="SourceGraphic" mode="normal"/>
-      </filter>
-
-      <radialGradient id="gradient1" gradientUnits="objectBoundingBox" cx="50%" cy="50%" r="50%">
-        <stop offset= "38%" stop-color="#000000" stop-opacity="1" />
-        <stop offset= "46%" stop-color="#073F80" stop-opacity="1" />
-        <stop offset= "90%" stop-color="#8EC0DD" stop-opacity="1" />
-        <stop offset="100%" stop-color="#2F3A46" stop-opacity="1" />
-      </radialGradient>
-      <g id="${id}_iris">
-        <ellipse cx="60" cy="60" rx="30" ry="30" opacity="1" fill="url(#gradient1)" />
-        <ellipse cx="50" cy="50" rx="7"  ry="7"  opacity="1" fill="#FFFFFF" fill-opacity="0.8"/>
-      </g>
-      <g id="${id}_openLids">
-        <path d="M0 60 A60,60 0 0,1 120,60 A60,30 0 0,0 0,60 Z" opacity="1" fill="#FDDC99" fill-opacity="1" filter="url(#shadow)" />
-        <path d="M0 60 A60,60 0 0,0 120,60 A60,40 0 0,1 0,60 Z" opacity="1" fill="#F4CB76" fill-opacity="1" />
-      </g>
-      <g id="${id}_closeLid">
-        <path class="closePath" d="" opacity="1" fill="#FDDC99" fill-opacity="1" />
-      </g>
-    </svg>
-    `;
-
-
     document.writeln(eyeView('leftEye'));
     document.writeln(eyeView('rightEye'));
 
     const v  = 14; // versatz - Abstand des Pupillenzentrums vom Augenzentrum in SVG units
-    let stepsValue = 20;
-    let timeValue = 300;
-
-    stepsSlider.onchange = _ => stepsValue = Number(stepsSlider.value); 
-    timeSlider.onchange =_ => timeValue = Number(timeSlider.value);    
-
 
     const eyeBinding = eyeId => {
         const rect          = document.querySelectorAll(eyeId + "_iris ellipse")[0].getBoundingClientRect();
         const iris          = document.querySelector(eyeId + "_iris");
         const closeLidLayer = document.querySelector(eyeId + "_closeLid");
-        let isLocked        = false;
+        closeLidLayer.style.opacity = 1;
 
-        setInterval( evt => {
-            if(!isLocked)
-                animate(stepsValue, true, timeValue, () => {animate(stepsValue, false, timeValue)});
-        }, 7 * 1000);
-
-        const combinePath = (curve) => `M0 60 A60,60 0 0,1 120,60 A60,${Math.abs(curve - 30)} 0 0,${curve > 30 ? 1 : 0} 0,60 Z`
-
-        
-
-        const animate = (steps, isOpen, time, ondone) => {
-            const toAnimate     = closeLidLayer.children[0];
-            const pathStart     = isOpen  ? combinePath(0) : combinePath(70);
-            const pathEnd       = !isOpen ? combinePath(0) : combinePath(70);
-            const eachStep      = 70 / (steps + 1);
-            let stepsToDo       = [];
-        
-            stepsToDo.push(pathStart);
-            for(let i = 0; i < steps; i++){
-                stepsToDo.push(combinePath(isOpen ? eachStep * (i + 1) : 70 - eachStep * i))
-            }
-            stepsToDo.push(pathEnd);
-
-            let currentStep = 0
-            let interval = setInterval(() => {
-                const curr = stepsToDo[currentStep];
-                toAnimate.setAttribute('d', curr);
-                currentStep++;
-                if(currentStep === stepsToDo.length) {
-                    clearInterval(interval);
-                    if(ondone) ondone();
-                }
-            }, time / steps);
-        }
-
-        
+        // setInterval( evt => {
+        //     if (closeLidLayer.style.opacity === '1') return; // do not close and then open if already closed
+        //     closeLidLayer.style.opacity = '1';
+        //     setTimeout(evt => closeLidLayer.style.opacity = '0', 300)
+        // }, 7 * 1000);
 
         const xo = rect.x + rect.width/2;  // x-origin
         const yo = rect.y + rect.height/2; // y-origin
 
-        document.querySelector(eyeId).onclick = evt => {
-            animate(stepsValue, !isLocked, timeValue);
-            isLocked = !isLocked;
-        }
+        document.querySelector(eyeId).onclick = evt =>
             closeLidLayer.style.opacity = (closeLidLayer.style.opacity === '1') ? '0' : '1';
 
         return evt => {
