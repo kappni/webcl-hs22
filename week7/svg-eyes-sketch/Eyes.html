@@ -33,57 +33,6 @@
 <h1 style="margin-left: 3em;">I see where you go...</h1>
 
 <script>
-
-    const eyeViewOld = id => `
-    <svg id="${id}" viewBox="0 0 120 120">
-
-      <filter id="shadow">
-        <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
-        <feOffset       dx="0" dy="8" />
-        <feColorMatrix  type="matrix"
-                        values="0 0 0 0  0
-                                0 0 0 0  0
-                                0 0 0 0  0
-                                0 0 0 .5 0"/>
-        <feBlend        in="SourceGraphic" mode="normal"/>
-      </filter>
-
-      <radialGradient id="gradient1" gradientUnits="objectBoundingBox" cx="50%" cy="50%" r="50%">
-        <stop offset= "38%" stop-color="#000000" stop-opacity="1" />
-        <stop offset= "46%" stop-color="#073F80" stop-opacity="1" />
-        <stop offset= "90%" stop-color="#8EC0DD" stop-opacity="1" />
-        <stop offset="100%" stop-color="#2F3A46" stop-opacity="1" />
-      </radialGradient>
-      <g id="${id}_iris">
-        <ellipse cx="60" cy="60" rx="30" ry="30" opacity="1" fill="url(#gradient1)" />
-        <ellipse cx="50" cy="50" rx="7"  ry="7"  opacity="1" fill="#FFFFFF" fill-opacity="0.8"/>
-      </g>
-      <g id="${id}_openLids">
-        <path d="M0 60 A60,60 0 0,1 120,60 A60,30 0 0,0 0,60 Z" opacity="1" fill="#FDDC99" fill-opacity="1" filter="url(#shadow)">
-        </path>
-        <path d="M0 60 A60,60 0 0,0 120,60 A60,40 0 0,1 0,60 Z" opacity="1" fill="#F4CB76" fill-opacity="1" />
-      </g>
-      <g id="${id}_closeLid">
-        <path class="closePath" d="" opacity="1" fill="#FDDC99" fill-opacity="1">
-            <animate 
-                attributeName="d"
-                values="M0 60 A60,60 0 0,1 120,60 A60,40 0 0,1 0,60 Z;
-                        M0 60 A60,60 0 0,1 120,60 A60,40 0 0,1 0,60 Z;
-                        M0 60 A60,60 0 0,1 120,60 A60,0  0 0,1 0,60 Z;
-                        M0 60 A60,60 0 0,1 120,60 A60,0  0 1,0 0,60 Z;
-                        M0 60 A60,60 0 0,1 120,60 A60,30 0 0,0 0,60 Z;
-                        M0 60 A60,60 0 0,1 120,60 A60,30 0 0,0 0,60 Z;
-                        M0 60 A60,60 0 0,1 120,60 A60,0  0 1,0 0,60 Z;
-                        M0 60 A60,60 0 0,1 120,60 A60,0  0 0,1 0,60 Z;
-                        M0 60 A60,60 0 0,1 120,60 A60,40 0 0,1 0,60 Z"
-                        M0 60 A60,60 0 0,1 120,60 A60,40 0 0,1 0,60 Z"
-                dur="3s"
-                repeatCount="indefinite" />
-        </path>
-      </g>
-    </svg>
-    `;
-
     const eyeView = id => `
     <svg id="${id}" viewBox="0 0 120 120">
 
@@ -138,7 +87,7 @@
 
         setInterval( evt => {
             if(!isLocked)
-                animate(stepsValue, true, timeValue, () => {animate(stepsValue, false, timeValue)});
+                animate(stepsValue, true, timeValue, () => {if(!isLocked) animate(stepsValue, false, timeValue)});
         }, 7 * 1000);
 
         const calculatePath = (curve) => `M0 60 A60,60 0 0,1 120,60 A60,${Math.abs(curve - 30)} 0 0,${curve > 30 ? 1 : 0} 0,60 Z`
@@ -176,10 +125,9 @@
         const yo = rect.y + rect.height/2; // y-origin
 
         document.querySelector(eyeId).onclick = evt => {
-            animate(stepsValue, !isLocked, timeValue);
             isLocked = !isLocked;
+            animate(stepsValue, isLocked, timeValue);
         }
-            closeLidLayer.style.opacity = (closeLidLayer.style.opacity === '1') ? '0' : '1';
 
         return evt => {
             const xm = evt.clientX - xo; // the normalized x/y coords to work with
